@@ -16,6 +16,35 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from api.views import GraphConstructionView, UserWeightView, WeightView, AdjacencyView
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    # GraphConstructionView POST
+    url(r'^graph/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})$', GraphConstructionView.as_view()),
+
+    # only GET on WeightView is implemented
+    url(
+        r'^weight/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})/'
+        r'(?P<source_vertex_id>\w{1,50})/(?P<target_vertex_id>\w{1,50})$',
+        WeightView.as_view()
+    ),
+
+    # AdjacenctyView GET
+    url(
+        r'^adjacent/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})/(?P<source_vertex_id>\w{1,50})$',
+        AdjacencyView.as_view()
+    ),
+
+    # UserWeightView GET
+    url(
+        r'^user-weight/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})/'
+        r'(?P<source_vertex_id>\w{1,50})/(?P<target_vertex_id>\w{1,50})$',
+        UserWeightView.as_view()
+    ),
+
+    # UserWeightView POST
+    url(
+        r'^user-weight/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})',
+        UserWeightView.as_view()
+    ),
 ]
