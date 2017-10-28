@@ -11,9 +11,15 @@ class NeoGraphClient(GraphClient):
 
     """
 
-    def __init__(self, graph_uuid):
+    def __init__(self,
+                 graph_uuid,
+                 neojs_url = "bolt://localhost:7687",
+                 neojs_username = "neo4j",
+                 neojs_password = "password"):
+
         self.graph_uuid = graph_uuid
-        self.driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
+        self.driver = GraphDatabase.driver(neojs_url, auth=(neojs_username, neojs_password))
+
 
     def run_query(self, query):
         """
