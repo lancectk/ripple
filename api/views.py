@@ -1,9 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
-
-
-
 from restless.views import Endpoint
 import json
 
@@ -60,8 +54,6 @@ class UserWeightView(Endpoint):
 
         return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id, 'version_id': version_id,
                 'payload': graph_elements }
-
-
 
 
 
