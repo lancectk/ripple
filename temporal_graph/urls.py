@@ -29,7 +29,7 @@ urlpatterns = [
         WeightView.as_view()
     ),
 
-    # AdjacenctyView GET
+    # AdjacencyView GET
     url(
         r'^adjacent/(?P<temporal_graph_id>\w{1,50})/(?P<weight_id>\w{1,50})/(?P<source_vertex_id>\w{1,50})$',
         AdjacencyView.as_view()

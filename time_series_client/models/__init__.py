@@ -1,1 +1,2 @@
 from time_series_client.models.graph_version import GraphVersion
+from time_series_client.models.user_edge_weight import UserEdgeWeight

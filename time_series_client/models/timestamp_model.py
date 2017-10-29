@@ -1,7 +1,9 @@
 from django.db import models
+from django.utils import timezone
 from datetime import datetime
-
 from django_unixdatetimefield import UnixDateTimeField
+
+from time_series_client.models.managers.core_manager import CoreManager
 
 class TimestampModel(models.Model):
     """
@@ -9,11 +11,12 @@ class TimestampModel(models.Model):
     Typically used for maintaining timeseries
 
     """
+    objects = CoreManager()
 
     # https://pypi.python.org/pypi/django-unixdatetimefield/
     #   django unix time field provides accessors
-    created_at     = UnixDateTimeField()
-    committed_at   = UnixDateTimeField()
+    created_at     = UnixDateTimeField(default=timezone.now, null=False)
+    committed_at   = UnixDateTimeField(null=True)
 
     datetime_format = '%Y-%m-%d %H:%M %Z'
 
@@ -41,5 +44,4 @@ class TimestampModel(models.Model):
         return TimestampModel.format_datetime(datetime.fromtimestamp(self.committed_at))
 
     def __str__(self):
-        return ('Object of class {} | Created at {} | Committed at {}'
-                .format(type(self), self.created_at_datetime(), self.committed_at_datetime()))
+        return f'Object of class {type(self)} | Created at {self.created_at} | Committed at {self.committed_at}'

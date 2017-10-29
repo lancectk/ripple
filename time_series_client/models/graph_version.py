@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from time_series_client.models.timestamp_model import TimestampModel
 
 from django.db import models
+
 
 class GraphVersion(TimestampModel):
     """
@@ -10,7 +13,7 @@ class GraphVersion(TimestampModel):
 
     """
     temporal_graph_id = models.CharField(max_length=64, null=False)
-    version_id        = models.CharField(max_length=64, null=False)
+    version_id        = models.IntegerField(null=False)
 
     committed         = models.BooleanField(default=False)
 
@@ -24,5 +27,18 @@ class GraphVersion(TimestampModel):
 
         :return:
         """
-        return f'{self.temporal_graph_id}_{self.version_id}'
+        return f'{self.temporal_graph_id}_v{self.version_id}'
+
+    def commit_version(self):
+        self.committed_at = datetime.now()
+        self.committed    = True
+
+        self.save()
+
+    def __str__(self):
+        return f'Graph temporal_graph_id [{self.temporal_graph_id}] | ' \
+               f'version_id [{self.version_id}] |' \
+               f'created at [{self.created_at}] |' \
+               f'committed at [{self.committed_at}]'
+
 

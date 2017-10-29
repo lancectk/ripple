@@ -8,13 +8,15 @@ class UserEdgeWeight(TimestampModel):
     Time series that tracks edge weight for a particular user
 
     """
-    user_id = models.IntegerField(null=False)
+    user_id   = models.IntegerField(null=False)
 
-    edge_id = models.CharField(max_length=64, null=False)
+    edge_id   = models.CharField(max_length=64, null=False)
 
-    weight  = models.FloatField(null=False)
+    weight_id = models.CharField(max_length=64, null=False)
+
+    weight    = models.FloatField(null=False)
 
     graph_version = models.ForeignKey(GraphVersion, null=False)
 
     class Meta:
-        unique_together = ('user_id', 'edge_id')
+        unique_together = ('user_id', 'edge_id', 'weight_id')

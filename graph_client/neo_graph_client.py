@@ -126,6 +126,7 @@ class NeoGraphClient(GraphClient):
         return ""
 
     def set_edge_property(self, source_vertex_id, target_vertex_id, prop_key, prop_value):
+        print("SETTING EDGE PROPERTY")
         """
         Sets edge property of the edge connecting source and target vertex.
         Creates source/target vertex and edge if does not exist
