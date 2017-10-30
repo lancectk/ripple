@@ -1,4 +1,5 @@
 import logging
+import os
 from graph_client.graph_client import GraphClient
 
 from neo4j.v1 import GraphDatabase
@@ -13,9 +14,9 @@ class NeoGraphClient(GraphClient):
 
     def __init__(self,
                  graph_uuid,
-                 neojs_url = "bolt://localhost:7687",
-                 neojs_username = "neo4j",
-                 neojs_password = "password"):
+                 neojs_url = os.environ['GRAPHENEDB_BOLT_URL'],
+                 neojs_username = os.environ['GRAPHENEDB_BOLT_USER'],
+                 neojs_password = os.environ['GRAPHENEDB_BOLT_PASSWORD']):
 
         self.graph_uuid = graph_uuid
         self.driver = GraphDatabase.driver(neojs_url, auth=(neojs_username, neojs_password))
