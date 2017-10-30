@@ -23,19 +23,21 @@ class GraphConstructionView(Endpoint):
             commit            = body['commit']
 
         except:
-            logger.error(f'Error parsing body of the message: {body}.'
-                         f'Ensure fields and format of body is correct. See docs.')
+            err_msg = f'Error parsing body of the message: {body}. ' \
+                      f'Ensure fields and format of body is correct. See docs.'
 
-            return HttpResponseBadRequest(f'Error parsing body of the message: {body}. '
-                                          'Ensure fields and format of body is correct. See docs.')
+            logger.error(err_msg)
+            return HttpResponseBadRequest(err_msg)
 
         try:
             tge = TemporalGraphEngine()
 
             success = tge.construct_graph(temporal_graph_id, weight_id, version_id, graph_elements, commit)
         except:
-            logger.error(f'Payload error. Ensure payload format is correct: {graph_elements}')
-            return HttpResponseBadRequest(f'Payload error. Ensure payload format is correct: {graph_elements}')
+            err_msg = f'Payload error. Ensure payload format is correct: {graph_elements}'
+
+            logger.error(err_msg)
+            return HttpResponseBadRequest(err_msg)
 
 
         return { 'success': success, 'temporal_graph_id': weight_id, 'version_id': version_id }
@@ -46,18 +48,15 @@ class WeightView(Endpoint):
 
         try:
             timestamp  = request.GET.get('timestamp', None)
+            timestamp = int(timestamp) if timestamp else None
+
             version_id = request.GET.get('version_id', None)
-
-            if version_id:
-                version_id = int(version_id)
-
-            if timestamp:
-                timestamp = int(timestamp)
+            version_id = int(version_id) if version_id else None
         except:
-            logger.error(f'Error parsing URL params: {request.GET}. timestamp and version must be Int. See docs.')
+            err_msg = f'Error parsing URL params: {request.GET}. timestamp and version must be Int. See docs.'
 
-            return HttpResponseBadRequest(f'Error parsing URL params: {request.GET}. '
-                                          f'timestamp and version must be Int. See docs.')
+            logger.error(err_msg)
+            return HttpResponseBadRequest(err_msg)
 
         try:
             tge = TemporalGraphEngine()
@@ -65,42 +64,93 @@ class WeightView(Endpoint):
             weight = tge.get_edge_weight(temporal_graph_id, weight_id,
                                          source_vertex_id, target_vertex_id,
                                          version_id, timestamp)
-        except:
-            logger.error(f'Application error while getting edge weight for request {request}.')
 
-            return HttpResponseServerError(f'Application error while getting edge weight for request {request}.')
+            weight = float(weight) if weight else None
+        except:
+            err_msg = f'Application error while getting edge weight for request {request}.'
+
+            logger.error(err_msg)
+            return HttpResponseServerError(err_msg)
 
         return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id, 'source_vertex_id': source_vertex_id,
-                'target_vertex_id': target_vertex_id, 'timestamp': timestamp, 'version_id': version_id, 'weight':weight }
+                'target_vertex_id': target_vertex_id, 'timestamp': timestamp, 'version_id': version_id, 'weight': weight }
 
 
 class UserWeightView(Endpoint):
     def get(self, request, temporal_graph_id, weight_id, source_vertex_id, target_vertex_id):
+        try:
+            timestamp  = request.GET.get('timestamp', None)
+            timestamp = int(timestamp) if timestamp else None
 
-        timestamp  = request.GET.get('timestamp', '')
-        version_id = request.GET.get('version_id', '')
-        user_id    = request.GET.get('user_id', '')
+            version_id = request.GET.get('version_id', None)
+            version_id = int(version_id) if version_id else None
 
+            user_id    = request.GET.get('user_id', None)
+            user_id    = int(user_id) if user_id else None
+        except:
+            logger.error(f'Error parsing URL params: {request.GET}.'
+                         f'timestamp, version_id and user_id must be Int. See docs.')
 
-        return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id, 'source_vertex_id': source_vertex_id,
-                'target_vertex_id': target_vertex_id, 'timestamp': timestamp, 'version_id': version_id, 'user_id': user_id}
+            return HttpResponseBadRequest(f'Error parsing URL params: {request.GET}.'
+                         f'timestamp, version_id and user_id must be Int. See docs.')
+
+        try:
+            tge = TemporalGraphEngine()
+
+            weight = tge.get_user_edge_weight(temporal_graph_id, weight_id,
+                                              source_vertex_id, target_vertex_id,
+                                              user_id, version_id, timestamp)
+            weight = float(weight) if weight else None
+
+        except:
+            err_msg = f'Application error while getting user edge weight for request {request}.'
+
+            logger.error(err_msg)
+            return HttpResponseServerError(err_msg)
+
+        return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id,
+                 'source_vertex_id': source_vertex_id, 'target_vertex_id': target_vertex_id,
+                 'timestamp': timestamp, 'version_id': version_id,
+                 'user_id': user_id, 'weight': weight}
+
 
     def post(self, request, temporal_graph_id, weight_id):
-        decoded_body_unicode = request.body.decode('utf-8')
-        body = json.loads(decoded_body_unicode)
+        try:
+            decoded_body_unicode = request.body.decode('utf-8')
+            body = json.loads(decoded_body_unicode)
 
-        version_id = body['version_id']
+            # payload contains graph elements to update
+            graph_elements    = body['payload']
+        except:
+            err_msg = f'Error parsing body of the message: {body}. ' \
+                      f'Ensure fields and format of body is correct. See docs.'
 
-        # payload contains graph elements to update
-        graph_elements    = body['payload']
+            logger.error(err_msg)
+            return HttpResponseBadRequest(err_msg)
 
-        return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id, 'version_id': version_id,
-                'payload': graph_elements }
+        try:
+            tge = TemporalGraphEngine()
+            success = tge.set_user_edge_weight(temporal_graph_id, weight_id, graph_elements)
+
+            if not success:
+                err_msg = f'Failed to write user-edge weight.' \
+                          f'Ensure committed temporal graph with id: {temporal_graph_id} exists.' \
+                          f'Ensure base edge for each user-edge weight exists'
+
+                logger.error(err_msg)
+                return HttpResponseBadRequest(err_msg)
+        except:
+            err_msg = f'Payload error. Ensure payload format is correct: {graph_elements}'
+            logger.error(err_msg)
+            return HttpResponseBadRequest(err_msg)
+
+        return { 'temporal_graph_id': temporal_graph_id, 'success': success}
 
 
 
 class AdjacencyView(Endpoint):
     def get(self, request, temporal_graph_id, weight_id, source_vertex_id):
+        # TODO: unimplemented
 
         return { 'temporal_graph_id': temporal_graph_id, 'weight_id': weight_id, 'source_vertex_id': source_vertex_id }
 
