@@ -8,14 +8,30 @@ logger = logging.getLogger(__name__)
 
 class TemporalGraphEngine():
     def get_graph_client(self, graph_uuid):
+        """
+        GraphClient used to travese graph
+
+        :param graph_uuid:
+        :return:
+        """
         return NeoGraphClient(graph_uuid)
 
     @classmethod
     def get_graph_version_model(cls):
+        """
+        ORM to get and set Graph Versions
+
+        :return:
+        """
         return GraphVersion
 
     @classmethod
     def get_user_edge_weight_model(cls):
+        """
+        ORM to get and set User Edge Weights
+
+        :return:
+        """
         return UserEdgeWeight
 
     def get_graph_version(self, temporal_graph_id, version_id = None, timestamp = None):
@@ -101,6 +117,7 @@ class TemporalGraphEngine():
         )
 
         if graph_version.committed:
+            # graph_version has been previously committed
             logger.error(f'TemporalGraph with id:{temporal_graph_id} and version: {version_id} cannot be'
                          f' modified since it has previously been COMMITTED')
 
@@ -212,7 +229,6 @@ class TemporalGraphEngine():
         graph_version = self.get_graph_version(temporal_graph_id, None, None)
 
         if graph_version:
-            # get edge property
             graph_client = self.get_graph_client(graph_version.graph_uuid)
 
             successful_writes = []

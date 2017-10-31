@@ -14,7 +14,7 @@ class NeoGraphClient(GraphClient):
 
     def __init__(self,
                  graph_uuid,
-                 neojs_url = os.environ['GRAPHENEDB_BOLT_URL'],
+                 neojs_url      = os.environ['GRAPHENEDB_BOLT_URL'],
                  neojs_username = os.environ['GRAPHENEDB_BOLT_USER'],
                  neojs_password = os.environ['GRAPHENEDB_BOLT_PASSWORD']):
 
@@ -127,7 +127,6 @@ class NeoGraphClient(GraphClient):
         return ""
 
     def set_edge_property(self, source_vertex_id, target_vertex_id, prop_key, prop_value):
-        print("SETTING EDGE PROPERTY")
         """
         Sets edge property of the edge connecting source and target vertex.
         Creates source/target vertex and edge if does not exist
